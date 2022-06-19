@@ -13,7 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/MiskevichStanislav/express-mesto-gha.git"
   },
-  "author": "",
+  "author": "Miskevich Stanislav",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/MiskevichStanislav/express-mesto-gha/issues"
