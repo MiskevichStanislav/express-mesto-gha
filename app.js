@@ -13,13 +13,13 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: '',
-//   };
+app.use((req, res, next) => {
+  req.user = {
+    _id: '',
+  };
 
-//   next();
-// });
+  next();
+});
 
 app.use('/users', usersRoute);
 app.use('/cards', cardsRoute);
