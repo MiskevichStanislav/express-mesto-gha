@@ -3,7 +3,8 @@ const express = require('express');
 const { PORT = 3000 } = process.env;
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-
+const { login, createUser } = require('./controllers/users');
+const auth = require('./middlewares/auth');
 const app = express();
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
@@ -19,6 +20,9 @@ app.use((req, res, next) => {
   next();
 });
 
+app.post('/signin', login);
+app.post('/signup', createUser);
+app.use(auth);
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
