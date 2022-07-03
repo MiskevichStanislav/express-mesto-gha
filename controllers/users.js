@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs'); // импортируем bcrypt
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const AuthError = require('../errors/authorisation_error_401');
@@ -6,14 +6,11 @@ const ConflictError = require('../errors/conflict_409');
 const NotFoundError = require('../errors/not-found-err_404');
 const ValidError = require('../errors/validation_error_400');
 
-// GET /users — возвращает всех пользователей
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
     .catch(next);
 };
-
-// GET /users/:userId - возвращает пользователя по _id
 module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
@@ -24,14 +21,11 @@ module.exports.getUser = (req, res, next) => {
     })
     .catch(next);
 };
-
-// POST /users — создаёт пользователя
 module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
 
-  // User.create({ name, about, avatar })
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name,
@@ -57,8 +51,6 @@ module.exports.createUser = (req, res, next) => {
       }
     });
 };
-
-// PATCH /users/me — обновляет профиль
 module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, {
@@ -79,7 +71,6 @@ module.exports.updateUser = (req, res, next) => {
     });
 };
 
-// PATCH /users/me/avatar — обновляет аватар
 module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, {
@@ -99,7 +90,6 @@ module.exports.updateAvatar = (req, res, next) => {
       return next(err);
     });
 };
-// Создайте контроллер login
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
@@ -123,8 +113,6 @@ module.exports.login = (req, res, next) => {
     })
     .catch(next);
 };
-
-// GET /users/me - возвращает информацию о текущем пользователе
 module.exports.getUserInfo = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
