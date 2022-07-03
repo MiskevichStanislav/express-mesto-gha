@@ -1,10 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const AuthError = require('../errors/authorisation_error_401');
-const ConflictError = require('../errors/ConflictErr_409');
-const NotFoundError = require('../errors/not-found-err_404');
-const ValidError = require('../errors/validation_error_400');
+const AuthErr = require('../errors/AuthorisationErr_401');
+const ConflictErr = require('../errors/ConflictErr_409');
+const NotFoundErr = require('../errors/NotFoundErr_404');
+const ValidErr = require('../errors/ValidationErr_400');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -15,7 +15,7 @@ module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        return next(new NotFoundError('Пользователь по _id не найден'));
+        return next(new NotFoundErr('Пользователь по _id не найден'));
       }
       return res.send({ data: user });
     })
@@ -42,10 +42,10 @@ module.exports.createUser = (req, res, next) => {
       _id: user._id,
     }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new ValidError('Введены некорректные данные'));
+      if (err.name === 'ValidationErr') {
+        next(new ValidErr('Введены некорректные данные'));
       } else if (err.code === 11000) {
-        next(new ConflictError('Такой пользователь уже существует!)'));
+        next(new ConflictErr('Такой пользователь уже существует!)'));
       } else {
         next(err);
       }
@@ -59,13 +59,13 @@ module.exports.updateUser = (req, res, next) => {
   })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь по указанному _id не найден');
+        throw new NotFoundErr('Пользователь по указанному _id не найден');
       }
       res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return next(new ValidError('Введены некорректные данные'));
+      if (err.name === 'ValidationErr') {
+        return next(new ValidErr('Введены некорректные данные'));
       }
       return next(err);
     });
@@ -79,13 +79,13 @@ module.exports.updateAvatar = (req, res, next) => {
   })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь по указанному _id не найден');
+        throw new NotFoundErr('Пользователь по указанному _id не найден');
       }
       res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidError') {
-        return next(new ValidError('Введены некорректные данные'));
+      if (err.name === 'ValidErr') {
+        return next(new ValidErr('Введены некорректные данные'));
       }
       return next(err);
     });
@@ -93,16 +93,16 @@ module.exports.updateAvatar = (req, res, next) => {
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
-  User.findOne({ email }).select('+password') // в случае аутентификации хеш пароля нужен
+  User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new AuthError('Неправильные почта или пароль'));
+        return Promise.reject(new AuthErr('Неправильные почта или пароль'));
       }
       return Promise.all([bcrypt.compare(password, user.password), user]);
     })
     .then(([isPasswordCorrect, user]) => {
       if (!isPasswordCorrect) {
-        return Promise.reject(new AuthError('Неправильная почта или пароль'));
+        return Promise.reject(new AuthErr('Неправильная почта или пароль'));
       }
       const token = jwt.sign(
         { _id: user._id },
@@ -117,13 +117,13 @@ module.exports.getUserInfo = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь по _id не найден');
+        throw new NotFoundErr('Пользователь по _id не найден');
       }
       return res.status(200).send({ data: user });
     })
     .catch((error) => {
-      if (error.name === 'CastError') {
-        return next(new ValidError('Некорректный id'));
+      if (error.name === 'CastErr') {
+        return next(new ValidErr('Некорректный id'));
       }
       return next(error);
     });

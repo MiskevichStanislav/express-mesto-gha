@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const { celebrate, Joi, errors } = require('celebrate');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const NotFoundError = require('./errors/NotFoundErr_404');
+const NotFoundErr = require('./errors/NotFoundErr_404');
 
 const app = express();
 
@@ -36,7 +36,7 @@ app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
 app.use('*', (req, res, next) => {
-  next(new NotFoundError('Страница не найдена'));
+  next(new NotFoundErr('Страница не найдена'));
 });
 app.use(errors());
 app.use((err, req, res, next) => {

@@ -1,7 +1,7 @@
 const Card = require('../models/card');
-const ValidError = require('../errors/validation_error_400');
-const ForbiddenError = require('../errors/forbidden_403');
-const NotFoundError = require('../errors/not-found-err_404');
+const ValidErr = require('../errors/ValidationErr_400');
+const ForbiddenErr = require('../errors/ForbiddenErr_403');
+const NotFoundErr = require('../errors/NotFoundErr_404');
 
 module.exports.getCards = (_req, res, next) => {
   Card.find({})
@@ -25,8 +25,8 @@ module.exports.createCard = (req, res, next) => {
   })
     .then((card) => res.status(201).send(card))
     .catch((err) => {
-      if (err.name === 'ValidError') {
-        return next(new ValidError('Введены некорректные данные'));
+      if (err.name === 'ValidErr') {
+        return next(new ValidErr('Введены некорректные данные'));
       }
       return next(err);
     });
@@ -36,10 +36,10 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Карточка отсутствует');
+        throw new NotFoundErr('Карточка отсутствует');
       }
       if (card.owner.toString() !== req.user._id) {
-        throw new ForbiddenError('Это чужая карточка, ее нельзя удалить');
+        throw new ForbiddenErr('Это чужая карточка, ее нельзя удалить');
       } else {
         return card.remove()
           .then(() => res.send({
@@ -56,7 +56,7 @@ module.exports.likeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Карточка отсутствует');
+        throw new NotFoundErr('Карточка отсутствует');
       }
       return res.send({ data: card });
     })
@@ -71,7 +71,7 @@ module.exports.dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Карточка отсутствует');
+        throw new NotFoundErr('Карточка отсутствует');
       }
       return res.send({ data: card });
     })
