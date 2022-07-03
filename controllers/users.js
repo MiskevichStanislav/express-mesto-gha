@@ -89,3 +89,41 @@ module.exports.updateAvatar = (req, res, next) => {
       return next(err);
     });
 };
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  User.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        return Promise.reject(new AuthError('Неправильные почта или пароль'));
+      }
+      return Promise.all([bcrypt.compare(password, user.password), user]);
+    })
+    .then(([isPasswordCorrect, user]) => {
+      if (!isPasswordCorrect) {
+        return Promise.reject(new AuthError('Неправильная почта или пароль'));
+      }
+      const token = jwt.sign(
+        { _id: user._id },
+        'some-secret-key',
+        { expiresIn: '7d' },
+      );
+      return res.send({ token });
+    })
+    .catch(next);
+}
+module.exports.getUserInfo = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь по _id не найден');
+      }
+      return res.status(200).send({ data: user });
+    })
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        return next(new ValidError('Некорректный id'));
+      }
+      return next(error);
+    });
+};
