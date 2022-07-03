@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const AuthError = require('../errors/authorisation_error_401');
-const ConflictError = require('../errors/conflict_409');
+const ConflictError = require('../errors/ConflictErr_409');
 const NotFoundError = require('../errors/not-found-err_404');
 const ValidError = require('../errors/validation_error_400');
 
