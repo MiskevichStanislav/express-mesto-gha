@@ -7,13 +7,26 @@ const { celebrate, Joi, errors } = require('celebrate');
 const cookieParser = require('cookie-parser');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+
+// const allowedCors = {
+//   origin: [
+//     'https://msprod.nomoredomains.xyz',
+//     'http://msprod.nomoredomains.xyz',
+//     'http://localhost:3000',
+//   ],
+//   credentials: true, // куки
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+// };
 const NotFoundErr = require('./errors/NotFoundErr_404');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
+// app.use(helmet());
 app.use(bodyParser.json());
+// app.use(cors(allowedCors));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.post('/signup', celebrate({
@@ -33,12 +46,21 @@ app.post('/signin', celebrate({
 }), login);
 
 app.use(auth);
+
+app.use(requestLogger);
+
+// app.get('/crash-test', () => {
+//   setTimeout(() => {
+//     throw new Error('Сервер сейчас упадёт');
+//   }, 0);
+// });
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
 app.use('*', (req, res, next) => {
   next(new NotFoundErr('Страница не найдена'));
 });
+app.use(errorLogger);
 app.use(errors());
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
